@@ -1,0 +1,10 @@
+SCENARIO example-healthy
+EMPTY
+ACCOUNT alice Alice 2200000
+ACCOUNT merchant Merchant 50000
+RESERVE 700000 seed
+OPEN p1 alice merchant 1700000 1000000 5 500 lane-a
+REFRESH p1
+RELEASE p1
+ADVANCE 2
+COMPLETE p1

@@ -1,0 +1,16 @@
+{
+  "name": "granite-dtl",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CTF C++ para garantias bloqueadas, penalizaciones y ratio de cobertura DTL.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check:js": "node scripts/check-js.mjs",
+    "test": "node --test --test-concurrency=1 \"tests/node/*.test.js\"",
+    "ci": "node scripts/ci.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

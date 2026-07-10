@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.gdtl": "plaintext"
+  },
+  "editor.formatOnSave": false
+}
