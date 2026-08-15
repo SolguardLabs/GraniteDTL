@@ -2,12 +2,121 @@
 
 #include "invariant.hpp"
 #include "planner.hpp"
+#include "treasury.hpp"
 
+#include <map>
 #include <sstream>
 
 namespace granite {
 
 namespace {
+
+TreasuryInput buildTreasuryInput(const Engine& engine) {
+  TreasuryInput input;
+  input.reserveCash = engine.vault().reserveCash;
+  input.penaltyReserve = engine.vault().penaltyReserve;
+  input.protocolFees = engine.vault().systemFees;
+  input.lockedCollateral = engine.vault().lockedCollateral;
+  input.realizedInsolvency = engine.vault().insolvency;
+
+  std::map<std::string, Amount> laneDebt;
+  for (const auto& item : engine.positions()) {
+    const Position& position = item.second;
+    if (position.terminal) {
+      continue;
+    }
+
+    input.openDebt += position.debt;
+    laneDebt[position.lane] += position.debt;
+    if (position.dueAt <= engine.now() + 2) {
+      input.maturingDebt += position.debt;
+    }
+  }
+
+  for (const auto& item : laneDebt) {
+    input.largestLaneDebt = AmountMath::max(input.largestLaneDebt, item.second);
+  }
+  return input;
+}
+
+void writeTreasuryProjection(JsonWriter& json,
+                             const TreasuryProjection& projection) {
+  json.beginObject();
+  json.key("name");
+  json.stringValue(projection.name);
+  json.comma();
+  json.key("valid");
+  json.boolValue(projection.valid);
+  json.comma();
+  json.key("stressed_reserve");
+  json.amountValue(projection.stressedReserve);
+  json.comma();
+  json.key("eligible_collateral");
+  json.amountValue(projection.eligibleCollateral);
+  json.comma();
+  json.key("recognized_penalty_reserve");
+  json.amountValue(projection.recognizedPenaltyReserve);
+  json.comma();
+  json.key("recognized_fees");
+  json.amountValue(projection.recognizedFees);
+  json.comma();
+  json.key("maturing_outflow");
+  json.amountValue(projection.maturingOutflow);
+  json.comma();
+  json.key("capital_buffer");
+  json.amountValue(projection.capitalBuffer);
+  json.comma();
+  json.key("total_resources");
+  json.amountValue(projection.totalResources);
+  json.comma();
+  json.key("total_obligations");
+  json.amountValue(projection.totalObligations);
+  json.comma();
+  json.key("net_liquidity");
+  json.amountValue(projection.netLiquidity);
+  json.comma();
+  json.key("liquidity_gap");
+  json.amountValue(projection.liquidityGap);
+  json.comma();
+  json.key("coverage_bps");
+  json.integerValue(projection.coverageBps);
+  json.comma();
+  json.key("lane_concentration_bps");
+  json.integerValue(projection.laneConcentrationBps);
+  json.comma();
+  json.key("band");
+  json.stringValue(projection.band);
+  json.endObject();
+}
+
+void writeTreasuryStress(JsonWriter& json, const Engine& engine) {
+  const TreasuryInput input = buildTreasuryInput(engine);
+  const std::vector<TreasuryProjection> projections =
+      TreasuryStressModel{}.matrix(input);
+
+  json.beginObject();
+  json.key("open_debt");
+  json.amountValue(input.openDebt);
+  json.comma();
+  json.key("maturing_debt");
+  json.amountValue(input.maturingDebt);
+  json.comma();
+  json.key("largest_lane_debt");
+  json.amountValue(input.largestLaneDebt);
+  json.comma();
+  json.key("scenarios");
+  json.beginArray();
+  bool first = true;
+  for (const TreasuryProjection& projection : projections) {
+    if (!first) {
+      json.comma();
+    }
+    first = false;
+    writeTreasuryProjection(json, projection);
+  }
+  json.endArray();
+  json.endObject();
+}
 
 void writePolicy(JsonWriter& json, const Policy& policy) {
   json.beginObject();
@@ -1041,6 +1150,9 @@ void writeReport(std::ostream& out, const Engine& engine) {
   json.comma();
   json.key("plan");
   writePlanReport(json, plan);
+  json.comma();
+  json.key("treasury_stress");
+  writeTreasuryStress(json, engine);
   json.comma();
   json.key("last_error");
   if (engine.lastError().empty()) {
