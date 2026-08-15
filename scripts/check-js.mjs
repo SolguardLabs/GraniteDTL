@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const dirs = ["scripts", "tests"];
+const dirs = ["scripts", "sdk", "tests"];
 
 function walk(dir) {
   const result = [];

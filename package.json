@@ -1,16 +1,28 @@
 {
   "name": "granite-dtl",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "CTF C++ para garantias bloqueadas, penalizaciones y ratio de cobertura DTL.",
+  "description": "Motor C++ de garantias, vencimientos y cobertura para operaciones DTL.",
+  "exports": {
+    ".": "./sdk/client.js",
+    "./report": "./sdk/report.js"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "check:js": "node scripts/check-js.mjs",
     "test": "node --test --test-concurrency=1 \"tests/node/*.test.js\"",
-    "ci": "node scripts/ci.mjs"
+    "ci": "node scripts/ci.mjs && npm run format:check && npm run audit:runtime && npm run verify:release",
+    "format": "prettier --write --config .prettierrc --ignore-path .prettierignore \"**/*.{js,mjs,json,md,yml,yaml}\"",
+    "format:check": "prettier --check --config .prettierrc --ignore-path .prettierignore \"**/*.{js,mjs,json,md,yml,yaml}\"",
+    "audit:runtime": "npm audit --omit=dev --audit-level=high",
+    "verify:release": "node scripts/verify-release.mjs"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.5"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24",
+    "npm": ">=11"
   }
 }
