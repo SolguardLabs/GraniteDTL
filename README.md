@@ -1,11 +1,11 @@
 # GraniteDTL
 
-![GraniteDTL](./assets/banner.png)
-
 [![CI](https://github.com/SolguardLabs/GraniteDTL/actions/workflows/ci.yml/badge.svg)](https://github.com/SolguardLabs/GraniteDTL/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/SolguardLabs/GraniteDTL?display_name=tag)](https://github.com/SolguardLabs/GraniteDTL/releases)
 [![C++](https://img.shields.io/badge/C%2B%2B-17-00599C)](https://isocpp.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-24-339933)](https://nodejs.org/)
+
+![GraniteDTL](./assets/banner.png)
 
 GraniteDTL es un motor determinista de garantías para obligaciones comerciales
 de larga duración. Coordina depósitos bloqueados, vencimientos, penalizaciones,
